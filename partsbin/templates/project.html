@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ proj.name }} <span class="pill {{ proj.status }}">{{ proj.status }}</span></h1>
+
+{% if lines %}
+<div class="card">
+    {% if buildable %}<span class="ok">You have everything for this build.</span>
+    {% else %}<span class="bad">Missing parts below.</span>{% endif %}
+    <span class="muted">Parts reserved by other projects marked "building" are not counted as free.</span>
+</div>
+{% endif %}
+
+<table>
+    <thead><tr><th>Part</th><th>Need</th><th>Free</th><th class="hide-sm">Owned</th><th></th></tr></thead>
+    <tbody>
+    {% for l in lines %}
+    <tr>
+        <td><a href="{{ url_for('index', q=l.name) }}">{{ l.name }}</a></td>
+        <td>{{ l.need }}</td>
+        <td class="{{ 'ok' if l.ok else 'bad' }}">{{ l.free }}</td>
+        <td class="hide-sm">{{ l.have }}</td>
+        <td>
+            <form method="post" class="inline">
+                <input type="hidden" name="action" value="remove">
+                <input type="hidden" name="line_id" value="{{ l.id }}">
+                <button type="submit" class="btn-danger">x</button>
+            </form>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="muted">No parts on this build yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<form method="post" class="toolbar" style="margin-top: 10px">
+    <input type="hidden" name="action" value="add">
+    <input name="part_name" list="names" placeholder="Part name" required>
+    <input name="qty" type="number" min="1" value="1" style="width: 80px">
+    <button type="submit" class="btn-primary">Add to build</button>
+</form>
+
+<form method="post" class="card" style="margin-top: 20px">
+    <input type="hidden" name="action" value="update">
+    <div class="form-grid">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+            {% for s in statuses %}<option {{ 'selected' if s == proj.status }}>{{ s }}</option>{% endfor %}
+        </select>
+        <label for="notes">Notes</label>
+        <textarea id="notes" name="notes">{{ proj.notes }}</textarea>
+    </div>
+    <div class="form-actions"><button type="submit">Save</button></div>
+</form>
+
+<form method="post" action="{{ url_for('project_delete', project_id=proj.id) }}" onsubmit="return confirm('Delete project {{ proj.name }}?')">
+    <button type="submit" class="btn-danger">Delete project</button>
+</form>
+<datalist id="names">{% for n in names %}<option value="{{ n }}">{% endfor %}</datalist>
+{% endblock %}

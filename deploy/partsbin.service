@@ -1,0 +1,13 @@
+[Unit]
+Description=PartsBin parts inventory
+After=network.target
+
+[Service]
+User=purplehaxttv
+WorkingDirectory=/home/purplehaxttv/partsbin
+Environment=PARTSBIN_DB=/home/purplehaxttv/partsbin/data/partsbin.db
+ExecStart=/home/purplehaxttv/partsbin/.venv/bin/gunicorn --workers 2 --bind 127.0.0.1:5055 wsgi:app
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PartsBin{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+    <a class="brand" href="{{ url_for('index') }}">Parts<span>Bin</span></a>
+    <nav>
+        <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">Parts</a>
+        <a href="{{ url_for('locations') }}" class="{{ 'active' if request.endpoint == 'locations' }}">Locations</a>
+        <a href="{{ url_for('projects') }}" class="{{ 'active' if request.endpoint in ('projects', 'project') }}">Projects</a>
+        <a href="{{ url_for('part_new') }}">+ Add part</a>
+    </nav>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

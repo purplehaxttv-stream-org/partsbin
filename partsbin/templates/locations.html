@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Locations</h1>
+<form method="post" class="toolbar">
+    <input name="name" placeholder="New location, e.g. Drawer 3 or Kit: ESP32 Basic" required>
+    <input name="notes" placeholder="Notes (optional)">
+    <button type="submit" class="btn-primary">Add</button>
+</form>
+<table>
+    <thead><tr><th>Name</th><th>Entries</th><th>Units</th><th class="hide-sm">Notes</th><th></th></tr></thead>
+    <tbody>
+    {% for l in locations %}
+    <tr>
+        <td><a href="{{ url_for('index', location=l.id) }}">{{ l.name }}</a></td>
+        <td>{{ l.part_count }}</td>
+        <td>{{ l.units }}</td>
+        <td class="hide-sm muted">{{ l.notes }}</td>
+        <td>
+            {% if l.part_count == 0 %}
+            <form method="post" action="{{ url_for('location_delete', loc_id=l.id) }}" class="inline">
+                <button type="submit" class="btn-danger">delete</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="muted">No locations yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

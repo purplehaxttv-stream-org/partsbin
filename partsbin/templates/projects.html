@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Projects</h1>
+<form method="post" class="toolbar">
+    <input name="name" placeholder="New project, e.g. Laser tripwire" required>
+    <input name="notes" placeholder="Notes (optional)">
+    <button type="submit" class="btn-primary">Create</button>
+</form>
+<table>
+    <thead><tr><th>Project</th><th>Status</th><th>Parts</th><th>Can build?</th></tr></thead>
+    <tbody>
+    {% for s in projects %}
+    <tr>
+        <td><a href="{{ url_for('project', project_id=s.p.id) }}">{{ s.p.name }}</a></td>
+        <td><span class="pill {{ s.p.status }}">{{ s.p.status }}</span></td>
+        <td>{{ s.lines }}</td>
+        <td>
+            {% if s.lines == 0 %}<span class="muted">no parts listed</span>
+            {% elif s.missing == 0 %}<span class="ok">yes</span>
+            {% else %}<span class="bad">missing {{ s.missing }}</span>{% endif %}
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="muted">No projects yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

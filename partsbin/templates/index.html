@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="toolbar" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="Search parts, tags, notes..." autofocus>
+    <select name="category" onchange="this.form.submit()">
+        <option value="">All categories</option>
+        {% for c in categories %}<option {{ 'selected' if c == category }}>{{ c }}</option>{% endfor %}
+    </select>
+    <select name="location" onchange="this.form.submit()">
+        <option value="">All locations</option>
+        {% for l in locations %}<option value="{{ l.id }}" {{ 'selected' if l.id|string == location }}>{{ l.name }}</option>{% endfor %}
+    </select>
+    <button type="submit">Search</button>
+    {% if q or category or location %}<a href="{{ url_for('index') }}">clear</a>{% endif %}
+</form>
+<div class="stats">{{ part_count }} entries, {{ total_units }} units</div>
+
+{% for cat, parts in grouped.items() %}
+<h2>{{ cat }}</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Part</th>
+        <th>Qty</th>
+        <th class="hide-sm">Location</th>
+        <th class="hide-sm">Reserved</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for p in parts %}
+        {% set k = p.name|lower %}
+        {% set total = totals.get(k, 0) %}
+        {% set free = total - reserved.get(k, 0) %}
+        <tr>
+            <td>
+                {% if p.link %}<a href="{{ p.link }}" target="_blank" rel="noopener">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}
+                {% for t in p.tags.split(',') if t.strip() %}<span class="tag">{{ t.strip() }}</span>{% endfor %}
+                {% if p.notes %}<div class="muted" style="white-space: pre-line">{{ p.notes }}</div>{% endif %}
+            </td>
+            <td>
+                <span class="qty" data-id="{{ p.id }}">
+                    <button type="button" data-delta="-1">-</button>
+                    <span class="n {{ 'zero' if p.qty == 0 }}">{{ p.qty }}</span>
+                    <button type="button" data-delta="1">+</button>
+                </span>
+            </td>
+            <td class="hide-sm">{{ p.location_name or '-' }}</td>
+            <td class="hide-sm">
+                {% if reserved.get(k) %}<span class="{{ 'bad' if free < 0 else 'warn' }}">{{ reserved.get(k) }} ({{ free }} free)</span>{% else %}<span class="muted">-</span>{% endif %}
+            </td>
+            <td><a href="{{ url_for('part_edit', part_id=p.id) }}">edit</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="card muted">No parts found.</div>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.qty').forEach(function (box) {
+    box.addEventListener('click', async function (e) {
+        var btn = e.target.closest('button');
+        if (!btn) return;
+        var res = await fetch('/part/' + box.dataset.id + '/adjust', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({delta: parseInt(btn.dataset.delta, 10)})
+        });
+        if (!res.ok) return;
+        var data = await res.json();
+        var n = box.querySelector('.n');
+        n.textContent = data.qty;
+        n.classList.toggle('zero', data.qty === 0);
+    });
+});
+</script>
+{% endblock %}
