@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS part (
     name TEXT NOT NULL,
     category TEXT NOT NULL DEFAULT 'Misc',
     qty INTEGER NOT NULL DEFAULT 0,
+    track TEXT NOT NULL DEFAULT 'count',
+    level TEXT NOT NULL DEFAULT 'plenty',
     location_id INTEGER REFERENCES location(id) ON DELETE SET NULL,
     tags TEXT NOT NULL DEFAULT '',
     notes TEXT NOT NULL DEFAULT '',
@@ -63,4 +65,11 @@ def close_db(_exc=None):
 
 
 def init_db():
-    get_db().executescript(SCHEMA)
+    db = get_db()
+    db.executescript(SCHEMA)
+    cols = {r["name"] for r in db.execute("PRAGMA table_info(part)")}
+    if "track" not in cols:
+        db.execute("ALTER TABLE part ADD COLUMN track TEXT NOT NULL DEFAULT 'count'")
+    if "level" not in cols:
+        db.execute("ALTER TABLE part ADD COLUMN level TEXT NOT NULL DEFAULT 'plenty'")
+    db.commit()
