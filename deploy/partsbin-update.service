@@ -1,0 +1,9 @@
+[Unit]
+Description=Update PartsBin from GitHub main
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=purplehaxttv
+ExecStart=/usr/local/bin/partsbin-update

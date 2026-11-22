@@ -1,0 +1,1 @@
+purplehaxttv ALL=(root) NOPASSWD: /usr/bin/systemctl restart partsbin
